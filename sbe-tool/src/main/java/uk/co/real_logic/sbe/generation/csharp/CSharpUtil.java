@@ -17,6 +17,7 @@
 package uk.co.real_logic.sbe.generation.csharp;
 
 import uk.co.real_logic.sbe.PrimitiveType;
+import uk.co.real_logic.sbe.ir.Token;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -100,4 +101,25 @@ public class CSharpUtil
     {
         return toUpperFirstChar(str);
     }
+
+    public static String generateTypeXmlComments(final String indent, final Token typeToken)
+    {
+        if (typeToken == null) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        final String description = typeToken.description();
+        if (null == description || description.isEmpty())
+        {
+            return sb.toString();
+        }
+
+
+        sb.append(indent).append("/// <summary>\n")
+                .append(indent).append("/// ").append(description).append('\n')
+                .append(indent).append("/// </summary>\n");
+
+        return sb.toString();
+    }
+
 }

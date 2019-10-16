@@ -25,6 +25,15 @@
             <type name="length" primitiveType="uint32" maxValue="1073741824"/>
             <type name="varData" primitiveType="uint8" length="0"/>
         </composite>
+        <type name="Text"              description="Free format text string."                  length="64"  primitiveType="char" semanticType="String"/>
+        <enum name="Side" description="Side" encodingType="char">
+            <validValue name="Buy">1</validValue>
+            <validValue name="Sell">2</validValue>
+            <validValue name="TwoWay">7</validValue>
+        </enum>
+        <set name="TradingFlags" encodingType="uint64" semanticType="Boolean"> <!-- Implemented as a set to avoid any problems with null values -->
+            <choice name="PossDupFlag" description="TRUE if message has been resent in response to an identified sequence number gap.">0</choice>
+        </set>
     </types>
     <types>
         <composite name="issue567Element" description="element for group exposing issue 567">
@@ -32,8 +41,13 @@
         </composite>
     </types>
     <sbe:message name="issue567" id="1" description="issue 567 test">
-        <group name="group" id="1">
-            <field name="groupField" id="2" type="issue567Element" />
+        <field name="MarketDepth" id="264" type="uint8" description="0=Full Book, 1=Top of Book, n=Number of Levels."/>
+        <field name="LegSide" id="624" type="Side" description="Side is from perspective of Taker and LegCurrency" />  <!-- enum -->
+        <field name="TradingFlags" id="43" type="TradingFlags" description="Indicates if this ErrorReport may have already been processed (it is being resent)."/>  <!-- bitset -->
+        <field name="Text" id="58" type="Text" description="Free format text string. May include extra information about the rejection."/>
+        <group name="group" id="1" description="group description here!">
+            <field name="groupField" id="2" type="issue567Element" description="groupField description"/>
         </group>
+
     </sbe:message>
 </sbe:messageSchema>

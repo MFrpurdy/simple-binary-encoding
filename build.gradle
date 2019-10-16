@@ -282,9 +282,9 @@ project(':sbe-all') {
         from project(':sbe-tool').sourceSets.main.allSource
     }
 
-    javadoc {
-        source += project(':sbe-tool').sourceSets.main.allJava
-    }
+//    javadoc {
+//        source += project(':sbe-tool').sourceSets.main.allJava
+//    }
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         archiveClassifier = 'javadoc'

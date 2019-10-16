@@ -67,5 +67,8 @@ public class Issue567GroupSizeTest
 
         // Act + Assert (no exception)
         generator.generate();
+
+        System.out.println("s = " + outputManager.getSources());
+
     }
 }

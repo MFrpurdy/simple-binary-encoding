@@ -619,6 +619,57 @@ namespace Org.SbeTool.Sbe.Tests
            Assert.AreEqual(expected, result);
        }
 
-       #endregion
+        #endregion
+
+        #region String
+
+
+        [TestMethod]
+        public void ShouldPutStringNullTerminated()
+        {
+            //checks we can write a string and then retrieves it 'longhand'
+            const string value = "abc123";
+            var encoding = System.Text.Encoding.ASCII;
+            const int index = 0;
+            var written = _directBuffer.SetNullTerminatedBytesFromString(encoding, value, index, value.Length, (byte)0);
+            var read = new byte[written];
+            var numBytesWritten = _directBuffer.GetBytes(index, read, 0, written);
+            Assert.AreEqual(1, numBytesWritten);
+            Assert.AreEqual((byte)0, read[read.Length - 1]);
+            string result = encoding.GetString(read);
+            Assert.AreEqual(value, result);
+        }
+
+        [TestMethod]
+        public void ShouldPutNullStringNullTerminated()
+        {
+            //checks we can write a string and then retrieves it 'longhand'
+            const string value = null;
+            var encoding = System.Text.Encoding.ASCII;
+            const int index = 0;
+            var written = _directBuffer.SetNullTerminatedBytesFromString(encoding, value, index, value.Length, (byte)0);
+            var read = new byte[written];
+            var len = _directBuffer.GetBytes(index, read, 0, written);
+            Assert.AreEqual(1, len);
+            Assert.AreEqual((byte)0, read[read.Length - 1]);
+            string str = encoding.GetString(read);
+            Assert.AreEqual(value, str);
+        }
+
+        [TestMethod]
+        public void ShouldGetStringNullTerminated()
+        {
+            var encoding = System.Text.Encoding.ASCII;
+            const string value = "abc123";
+            var bytes = encoding.GetBytes(value);
+            const int index = 0;
+            var written = _directBuffer.SetBytes(index, bytes, 0, bytes.Length);
+            Assert.AreEqual(bytes.Length, written);
+            var written2 = _directBuffer.SetBytes(index + bytes.Length, new byte[] { (byte)0 }, 0, 1);
+            Assert.AreEqual(1, written2);
+            string result = _directBuffer.GetStringFromNullTerminatedBytes(encoding, index, _directBuffer.Capacity - index, (byte)0);
+            Assert.AreEqual(result, value);
+        }
+        #endregion
     }
 }
