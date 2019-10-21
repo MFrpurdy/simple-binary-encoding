@@ -647,25 +647,6 @@ namespace Org.SbeTool.Sbe.Dll
         }
 
         /// <summary>
-        /// Reads a number of bytes from the buffer to create a string.
-        /// </summary>
-        /// <param name="encoding">The text encoding to use for string creation</param>
-        /// <param name="index">index in the underlying buffer to start from</param>
-        /// <param name="length">The maximum number of bytes to read</param>
-        /// <param name="nullByte">The null value for this string</param>
-        /// <returns>The created string</returns>
-        public string GetString(System.Text.Encoding encoding, int index, int length, byte nullByte)
-        {
-            int count = Math.Min(length, _capacity - index);
-            if (count <= 0)
-                ThrowHelper.ThrowIndexOutOfRangeException(index);
-            if (*(_pBuffer + index) == nullByte)
-                return null;
-            else
-                return encoding.GetString(_pBuffer + index, count);
-        }
-
-        /// <summary>
         /// Reads a number of bytes from the buffer to create a string, truncating the string if a null byte is found
         /// </summary>
         /// <param name="encoding">The text encoding to use for string creation</param>
@@ -685,7 +666,7 @@ namespace Org.SbeTool.Sbe.Dll
                 return null;
             }
             int byteCount2 = 0;
-            for (byteCount2 = 0; byteCount2 < count && _pBuffer[byteCount2] != nullByte; byteCount2++)
+            for (byteCount2 = 0; byteCount2 < count && _pBuffer[index + byteCount2] != nullByte; byteCount2++)
             {
             }
             return encoding.GetString(_pBuffer + index, byteCount2);
