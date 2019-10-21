@@ -436,6 +436,34 @@ public class CSharpGenerator implements CodeGenerator
                     lengthTypePrefix,
                     lengthCSharpType,
                     byteOrderStr));
+                sb.append(System.lineSeparator())
+                  .append(String.format(
+                    indent + "public string %1$sX\n" +
+                    indent + "{\n" +
+                    indent + INDENT +"get\n" +
+                    indent + INDENT +"{\n" +
+                    indent + INDENT + INDENT + "const int sizeOfLengthField = %2$d;\n" +
+                    indent + INDENT + INDENT + "int limit = _parentMessage.Limit;\n" +
+                    indent + INDENT + INDENT + "_buffer.CheckLimit(limit + sizeOfLengthField);\n" +
+                    indent + INDENT + INDENT + "int dataLength = (int)_buffer.%3$sGet%4$s(limit);\n" +
+                    indent + INDENT + INDENT + "return _buffer.GetStringFromNullTerminatedBytes(Encoding.GetEncoding(%1$sCharacterEncoding), limit + sizeOfLengthField, dataLength, (byte)0);\n" +
+                    indent + INDENT +"}\n" +
+                    indent + INDENT +"set\n" +
+                    indent + INDENT +"{\n" +
+                    indent + INDENT + INDENT + "var encoding = Encoding.GetEncoding(%1$sCharacterEncoding);\n" +
+                    indent + INDENT + INDENT + "const int sizeOfLengthField = %2$d;\n" +
+                    indent + INDENT + INDENT + "int limit = _parentMessage.Limit;\n" +
+                    indent + INDENT + INDENT + "_parentMessage.Limit = limit + sizeOfLengthField + value.Length;\n" +
+                    indent + INDENT + INDENT + "_buffer.%3$sPut%4$s(limit, (ushort)value.Length);\n" +
+                    indent + INDENT + INDENT + "int byteCount = encoding.GetByteCount(value);\n" +
+                    indent + INDENT + INDENT + "_buffer.SetNullTerminatedBytesFromString(encoding, value, limit + sizeOfLengthField, byteCount, (byte)0);\n" +
+                    indent + INDENT +"}\n" +
+                    indent + "}\n",
+                    propertyName,
+                    sizeOfLengthField,
+                    lengthTypePrefix,
+                    byteOrderStr
+                  ));
             }
         }
         return sb;
@@ -1101,26 +1129,6 @@ public class CSharpGenerator implements CodeGenerator
             generateLiteral(ir.headerStructure().schemaVersionType(), Integer.toString(ir.version())),
             semanticType,
             className);
-    }
-
-    private CharSequence generateStaticEncodings(final List<Token> tokens, final String indent)
-    {
-        final HashSet<String> alreadySeen = new HashSet<>();
-        final StringBuilder sb = new StringBuilder();
-        for (Token token : tokens)
-        {
-            if (token.name().equals("SettlCurrency")) {
-                System.out.println("token = " +  token.applicableTypeName());
-            }
-
-            if (!alreadySeen.contains(token.name()) && token.arrayLength() > 1 && token.encoding().primitiveType() == PrimitiveType.CHAR && token.signal() == Signal.ENCODING)
-            {
-                alreadySeen.add(token.name());
-                sb.append(indent).append(INDENT);
-                sb.append(String.format("private static Encoding %1$sEncoder = Encoding.GetEncoding(%1$sCharacterEncoding);\n", token.name()));
-            }
-        }
-        return sb;
     }
 
     private CharSequence generateFields(final List<Token> tokens, final String indent)
