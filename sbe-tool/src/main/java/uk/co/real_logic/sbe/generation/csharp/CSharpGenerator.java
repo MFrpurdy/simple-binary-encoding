@@ -1035,7 +1035,8 @@ public class CSharpGenerator implements CodeGenerator
         final String schemaVersionType = cSharpTypeName(ir.headerStructure().schemaVersionType());
 
         return String.format(
-            INDENT + INDENT + "public const %1$s SchemaVersion = %2$s;\n\n" +
+            INDENT + INDENT + "public const %1$s SbeSchemaVersion = %2$s;\n\n" +
+            INDENT + INDENT + "public const %1$s SbeSchemaId = %3$s;\n\n" +
             INDENT + INDENT + "private DirectBuffer _buffer;\n" +
             INDENT + INDENT + "private int _offset;\n" +
             INDENT + INDENT + "private int _actingVersion;\n\n" +
@@ -1048,12 +1049,13 @@ public class CSharpGenerator implements CodeGenerator
             INDENT + INDENT + "public void Wrap(DirectBuffer buffer, int offset)\n" +
             INDENT + INDENT + "{\n" +
             INDENT + INDENT + INDENT + "_offset = offset;\n" +
-            INDENT + INDENT + INDENT + "_actingVersion = SchemaVersion;\n" +
+            INDENT + INDENT + INDENT + "_actingVersion = SbeSchemaVersion;\n" +
             INDENT + INDENT + INDENT + "_buffer = buffer;\n" +
             INDENT + INDENT + "}\n\n" +
-            INDENT + INDENT + "public const int Size = %3$d;\n",
+            INDENT + INDENT + "public const int Size = %4$d;\n",
           schemaVersionType,
           generateLiteral(ir.headerStructure().schemaVersionType(), Integer.toString(ir.version())),
+          generateLiteral(ir.headerStructure().schemaIdType(), Integer.toString(ir.id())),
           size);
     }
 
