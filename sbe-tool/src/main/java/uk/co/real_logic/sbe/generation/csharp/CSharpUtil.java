@@ -102,18 +102,29 @@ public class CSharpUtil
         return toUpperFirstChar(str);
     }
 
-    public static String generateTypeXmlComments(final String indent, final Token typeToken)
+    public static String generateTypeXmlComments(final String indent, final Token typeToken, final Token signalToken)
     {
-        if (typeToken == null) {
+
+        final Token docToken;
+        if (signalToken != null && signalToken.description() != null)
+        {
+            docToken = signalToken;
+        }
+        else
+        {
+            docToken = typeToken;
+        }
+
+        if (docToken == null)
+        {
             return "";
         }
         final StringBuilder sb = new StringBuilder();
-        final String description = typeToken.description();
+        final String description = docToken.description();
         if (null == description || description.isEmpty())
         {
             return sb.toString();
         }
-
 
         sb.append(indent).append("/// <summary>\n")
                 .append(indent).append("/// ").append(description).append('\n')
