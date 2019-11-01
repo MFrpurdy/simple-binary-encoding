@@ -646,6 +646,35 @@ namespace Org.SbeTool.Sbe.Dll
             return count;
         }
 
+        public unsafe int SetBytesFromString(System.Text.Encoding encoding, string s, int index)
+        {
+
+           int available = _capacity - index;
+
+           int byteCount = encoding.GetByteCount(s);
+
+           if (byteCount > available)
+           {
+               ThrowHelper.ThrowIndexOutOfRangeException(_capacity);
+           }
+           fixed (char* ptr = s)
+           {
+               encoding.GetBytes(ptr, s.Length, _pBuffer + index, byteCount);
+           }
+           return byteCount;
+        }
+
+        public unsafe string GetStringFromBytes(Encoding encoding, int index, int byteCount)
+        {
+            int num = _capacity - index;
+            if (byteCount > num)
+            {
+                ThrowHelper.ThrowIndexOutOfRangeException(_capacity);
+            }
+
+            return encoding.GetString(_pBuffer + index, byteCount);
+        }
+
         /// <summary>
         /// Reads a number of bytes from the buffer to create a string, truncating the string if a null byte is found
         /// </summary>

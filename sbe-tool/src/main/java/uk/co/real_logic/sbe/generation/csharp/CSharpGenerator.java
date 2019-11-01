@@ -390,17 +390,14 @@ public class CSharpGenerator implements CodeGenerator
                     indent + INDENT + "_buffer.CheckLimit(_parentMessage.Limit + %2$d);\n" +
                     indent + INDENT + "return (int)_buffer.%3$sGet%4$s(_parentMessage.Limit);\n" +
                     indent + "}\n",
-                    propertyName,
-                    sizeOfLengthField,
-                    lengthTypePrefix,
-                    byteOrderStr));
+                    propertyName, sizeOfLengthField, lengthTypePrefix, byteOrderStr));
                 sb.append(String.format("\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public int Get%1$s(byte[] dst, int dstOffset, int length) =>\n" +
                     indent + INDENT + "Get%1$s(new Span<byte>(dst, dstOffset, length));\n",
                     propertyName));
                 sb.append(String.format("\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public int Get%1$s(Span<byte> dst)\n" +
                     indent + "{\n" +
                     "%2$s" +
@@ -413,13 +410,10 @@ public class CSharpGenerator implements CodeGenerator
                     indent + INDENT + "_buffer.GetBytes(limit + sizeOfLengthField, dst.Slice(0, bytesCopied));\n\n" +
                     indent + INDENT + "return bytesCopied;\n" +
                     indent + "}\n",
-                    propertyName,
-                    generateArrayFieldNotPresentCondition(token.version(), indent),
-                    sizeOfLengthField,
-                    lengthTypePrefix,
-                    byteOrderStr));
+                    propertyName, generateArrayFieldNotPresentCondition(token.version(), indent),
+                    sizeOfLengthField, lengthTypePrefix, byteOrderStr));
                 sb.append(String.format(indent + "\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "// Allocates and returns a new byte array\n" +
                     indent + "public byte[] Get%1$sBytes()\n" +
                     indent + "{\n" +
@@ -433,17 +427,14 @@ public class CSharpGenerator implements CodeGenerator
                     indent + INDENT + "_buffer.GetBytes(limit + sizeOfLengthField, data);\n\n" +
                     indent + INDENT + "return data;\n" +
                     indent + "}\n",
-                    propertyName,
-                    sizeOfLengthField,
-                    lengthTypePrefix,
-                    byteOrderStr));
+                    propertyName, sizeOfLengthField, lengthTypePrefix, byteOrderStr));
                 sb.append(String.format("\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public int Set%1$s(byte[] src, int srcOffset, int length) =>\n" +
                     indent + INDENT + "Set%1$s(new ReadOnlySpan<byte>(src, srcOffset, length));\n",
                     propertyName));
                 sb.append(String.format("\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public int Set%1$s(ReadOnlySpan<byte> src)\n" +
                     indent + "{\n" +
                     indent + INDENT + "const int sizeOfLengthField = %2$d;\n" +
@@ -453,39 +444,31 @@ public class CSharpGenerator implements CodeGenerator
                     indent + INDENT + "_buffer.SetBytes(limit + sizeOfLengthField, src);\n\n" +
                     indent + INDENT + "return src.Length;\n" +
                     indent + "}\n",
-                    propertyName,
-                    sizeOfLengthField,
-                    lengthTypePrefix,
-                    lengthCSharpType,
-                    byteOrderStr));
+                    propertyName, sizeOfLengthField, lengthTypePrefix, lengthCSharpType, byteOrderStr));
                 sb.append(lineSeparator())
                     .append(String.format(
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public string Get%1$s()\n" +
                     indent + "{\n" +
                     indent + INDENT + "const int sizeOfLengthField = %2$d;\n" +
                     indent + INDENT + "int limit = _parentMessage.Limit;\n" +
                     indent + INDENT + "_buffer.CheckLimit(limit + sizeOfLengthField);\n" +
                     indent + INDENT + "int dataLength = (int)_buffer.%3$sGet%4$s(limit);\n" +
-                    indent + INDENT + "return _buffer.GetStringFromNullTerminatedBytes(%1$sResolvedCharacterEncoding," +
-                    " limit + sizeOfLengthField, dataLength, (byte)0);\n" +
+                    indent + INDENT + "return _buffer.GetStringFromBytes(%1$sResolvedCharacterEncoding," +
+                    " limit + sizeOfLengthField, dataLength);\n" +
                     indent + "}\n\n" +
-                    generateTypeXmlComments(TWO_INDENTS, token, null) +
+                    generateTypeXmlComments(indent, token, null) +
                     indent + "public void Set%1$s(string value)\n" +
                     indent + "{\n" +
                     indent + INDENT + "var encoding = %1$sResolvedCharacterEncoding;\n" +
                     indent + INDENT + "const int sizeOfLengthField = %2$d;\n" +
                     indent + INDENT + "int limit = _parentMessage.Limit;\n" +
-                    indent + INDENT + "int byteCount = encoding.GetByteCount(value);\n" +
+                    indent + INDENT + "int byteCount = _buffer.SetBytesFromString(encoding, value, " +
+                    "limit + sizeOfLengthField);\n" +
                     indent + INDENT + "_parentMessage.Limit = limit + sizeOfLengthField + byteCount;\n" +
                     indent + INDENT + "_buffer.%3$sPut%4$s(limit, (ushort)byteCount);\n" +
-                    indent + INDENT + "_buffer.SetNullTerminatedBytesFromString(encoding, value, " +
-                    "limit + sizeOfLengthField, byteCount, (byte)0);\n" +
                     indent + "}\n",
-                    propertyName,
-                    sizeOfLengthField,
-                    lengthTypePrefix,
-                    byteOrderStr
+                    propertyName, sizeOfLengthField, lengthTypePrefix, byteOrderStr
                 ));
             }
         }
@@ -975,7 +958,6 @@ public class CSharpGenerator implements CodeGenerator
                 "_offset + %2$s, %1$sLength, %1$sNullValue);\n" +
                 indent + "}\n",
                 propName, offset));
-
         }
 
         return sb;
@@ -1075,16 +1057,16 @@ public class CSharpGenerator implements CodeGenerator
         final String schemaVersionType = cSharpTypeName(ir.headerStructure().schemaVersionType());
 
         return String.format(
-            INDENT + INDENT + "private DirectBuffer _buffer;\n" +
-            INDENT + INDENT + "private int _offset;\n" +
-            INDENT + INDENT + "private int _actingVersion;\n\n" +
-            INDENT + INDENT + "public void Wrap(DirectBuffer buffer, int offset, int actingVersion = Schema.Version)\n" +
-            INDENT + INDENT + "{\n" +
-            INDENT + INDENT + INDENT + "_offset = offset;\n" +
-            INDENT + INDENT + INDENT + "_actingVersion = actingVersion;\n" +
-            INDENT + INDENT + INDENT + "_buffer = buffer;\n" +
-            INDENT + INDENT + "}\n\n" +
-            INDENT + INDENT + "public const int Size = %4$d;\n",
+            TWO_INDENTS + "private DirectBuffer _buffer;\n" +
+            TWO_INDENTS + "private int _offset;\n" +
+            TWO_INDENTS + "private int _actingVersion;\n\n" +
+            TWO_INDENTS + "public void Wrap(DirectBuffer buffer, int offset, int actingVersion = Schema.Version)\n" +
+            TWO_INDENTS + "{\n" +
+            TWO_INDENTS + INDENT + "_offset = offset;\n" +
+            TWO_INDENTS + INDENT + "_actingVersion = actingVersion;\n" +
+            TWO_INDENTS + INDENT + "_buffer = buffer;\n" +
+            TWO_INDENTS + "}\n\n" +
+            TWO_INDENTS + "public const int Size = %4$d;\n",
           schemaVersionType,
           generateLiteral(ir.headerStructure().schemaVersionType(), Integer.toString(ir.version())),
           generateLiteral(ir.headerStructure().schemaIdType(), Integer.toString(ir.id())),
